@@ -438,6 +438,10 @@ conditions in the parameter file that only differ in randomisation. This can be 
 a PC installation starting from a batch file. For current online experiment (@7/2/2021) not clear
 how. Tried running PHP exec to run script but did not work.
 
+Print a summary of trials within phases/contexts e.g. 
+   Phase 1, context A: 5x A+, 5x B-; context B: 3x C-:
+   Phase 2, context A: 5x AB+, 5x B-; context B: 3x C-:
+
 
 =head2 RANDOMISATION DETAILS
 
