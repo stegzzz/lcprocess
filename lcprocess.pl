@@ -423,16 +423,48 @@ installed by running cpan String::Random and cpan File::BackupCopy.
 
 B<This program> will read the given input parameter file and will randomise the trial 
 order (within phase) and/or cue colour allocations and/or cue positions and/or cue 
-flash rates and/or context allocations in any combinations desired. 
+flash rates and/or context allocations in any combinations desired. See RANDOMISATION DETAILS below.
 
 Suggested usage for simple experiment: create one experimental condition manually. Copy
 that n-times and then apply desired randomisations. Set CONDITIONS CONTAINED = n and 
 CONDITION = 0. 
 
-Suggested development: run lcprocess before starting learningchicken. That way there will
-be no need to duplicate conditions in the parameter file that only differ in randomisation.
-
 learning chicken experiment game developed by Dr. Byron Nelson
+
+=head2 SUGGESTED DEVELOPMENTS
+
+Run lcprocess before starting learningchicken. That way there will be no need to duplicate
+conditions in the parameter file that only differ in randomisation. This can be done easily in
+a PC installation starting from a batch file. For current online experiment (@7/2/2021) not clear
+how. Tried running PHP exec to run script but did not work.
+
+
+=head2 RANDOMISATION DETAILS
+
+   For each experimental condition in the target file the CS DEFINITIONS, CONTEXT DEFINITIONS, and Trial block
+   are randomised as follows: 
+
+   -trialRandomise
+   
+   Trials are sorted on PHASE, randomising order within phase.
+   
+   -cueColourRandomise
+   
+   Each of the RGB values in the CS DEFINITION block are randomly allocated to each of the CS definitions.
+   
+   -positionRandomise
+   
+   Each of the cue position values in the CS DEFINITION block are randomly allocated to each of the CS definitions.
+   
+   -rateRandomise
+   
+   Each of the flash rate values in the CS DEFINITION block are randomly allocated to each of the CS definitions.
+   
+   -contextRandomise
+   
+   Each of the context names in the CONTEXT DEFINITION block are randomly allocated to each integer valued
+   context code with the exception of the TRAINING context i.e. the line "0 =  TRAINING" is left unchanged. 
+
 
 =head1 AUTHOR
 
