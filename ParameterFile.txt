@@ -1,0 +1,119 @@
+--- the area between ******** and the line of ************ represents one condition 
+--- PROLIFIC CODE = whatever code/link you want to put here, but a link is not clickable or copyable
+--- TESTING = TRUE or FALSE.  True sets all ITIs and PRE values to 1s
+--- EXPERIMENT =   Name of experiment
+--- CONDITIONS CONTAINED = number of conditions contained
+--- CONDITION =  0 or -1 will make it randomly select a condition, any other number it will run that condition.
+--- SAVE FILE =   name of file in which it will save the data (you could use this or override it in the php file)
+--- LOG COUNT of the number of subjects presently in each condition (Under development)
+--- CONDITION NAME is the name of the condition
+--- TRIALS NUMBER OF TRIALS
+--- CS DEFINITIONS number of different single CSs
+------ CS Label = R,G,B,On Time,duration,position,flashrate (0 is constant) (USE WHOLE SECONDS IN ON AND OFF TIMES, RGB values are 0 to 1)
+--- US DEFINITIONS number of different single USs
+------ US Label = Type, On Time, Off Time, probability  (USE WHOLE SECONDS IN ON AND OFF TIMES.  P for + is always 1)
+--- EVENT STRUCTURES  combinations of CSs and USs defined in the CS and US definitions
+------  DO NOT mix + and ! in a single event.  You can have multiple +'s 
+------  in compound stimuli that have different ON times, put in order of coming on in the string
+--- ITI TYPE FIXED or RANDOM mean, min, max  (RANDOM UNDER DEVELOPMENT)
+--- ITI when fixed these numbers are the inter trial intervals (US offset to PRE onset) in WHOLE SECONDS for each trial
+--- PRE pre-cs periods in whole seconds for each trial
+--- EVENT the event from the EVENT STRUCTURES to occur on the trial.  1 is the first in the structure, 2, the second etc
+--- CONTEXT 1,2, or 3, is the context where the event takes place
+--- PHASE for you to identify the phase of training in the data file.
+--- End the file with the word FIN.
+
+
+
+PROLIFIC CODE = prolific_code
+TESTING = TRUE
+EXPERIMENT = FWILLIS_FHP_FHN
+CONDITIONS CONTAINED = 1
+CONDITION = 0
+SAVE FILE = fwpn.txt
+
+LOG COUNT
+7
+6
+6
+6
+6
+6
+7
+6
+
+***** Experimental Red+ RedBlue+ *************************************************
+CONDITION NAME = RGBY
+
+NUMBER OF TRIALS = 4
+
+CS DEFINITIONS = 4 
+A = 0.9,0.9,0.1,0,5,3, 1   
+B = 0.1,0.9,0.1,0,5,1, 4   
+C = 0.9,0.1,0.1,0,5,2, 3   
+G = 0.1,0.1,0.9,0,5,4, 2   
+
+US DEFINITIONS = 3
++ = +,5,6,1.0
+! = !,5,6,1.0
+- = -,5,6,1.0
+
+CONTEXT DEFINITIONS = 4
+0 = TRAINING
+1 = WAGNERIA
+2 = BOUTONIA
+3 = LAMOUROXIA
+
+EVENT_STRUCTURES = 4
+A+
+B!
+C-
+G+
+
+ITITYPE = FIXED 
+Trial#		 1	2	3	4	
+ITI =	 	9	5	7	5
+PRE =	 	5	5	5	5
+EVENT =	 	4	1	2	3
+CONTEXT = 	2	1	1	2
+PHASE =	 	1	1	1	1
+RUN = 1 to 4
+
+***** Experimental Red+ RedBlue+ *************************************************
+CONDITION NAME = RGBY
+
+NUMBER OF TRIALS = 4
+
+CS DEFINITIONS = 4 
+A = 0.9,0.9,0.1,0,5,3, 1   
+B = 0.9,0.1,0.1,0,5,2, 4   
+C = 0.1,0.1,0.9,0,5,4, 2   
+G = 0.1,0.9,0.1,0,5,1, 3   
+
+US DEFINITIONS = 3
++ = +,5,6,1.0
+! = !,5,6,1.0
+- = -,5,6,1.0
+
+CONTEXT DEFINITIONS = 4
+0 = TRAINING
+1 = WAGNERIA
+2 = LAMOUROXIA
+3 = BOUTONIA
+
+EVENT_STRUCTURES = 4
+A+
+B!
+C-
+G+
+
+ITITYPE = FIXED 
+Trial#		 1	2	3	4	
+ITI =	 	7	5	15	9
+PRE =	 	5	5	15	5
+EVENT =	 	2	3	4	4
+CONTEXT = 	1	2	4	2
+PHASE =	 	1	1	1	1
+RUN = 1 to 4
+
+FIN.
