@@ -23,7 +23,7 @@ my $randomiseFlashRate             = '';
 my $randomiseContexts              = '';
 my $allRandomisations              = '';
 my $printVersion                   = '';
-my $version                        = '0.1.0';
+my $version                        = '0.1.1';
 
 if ( !$nargs && !$runWithNoArgsAllowed ) {
 	pod2usage(2);    #exit error 2 after printing SYNOPSIS, verbose 0
@@ -53,6 +53,7 @@ if (
 	&& (
 		!(
 			   $randomiseCueColours
+			|| $randomiseTrialOrderWithinPhase
 			|| $randomiseCuePositions
 			|| $randomiseFlashRate
 			|| $randomiseContexts
@@ -94,6 +95,18 @@ sub cvtTL {
 	return $result;
 }
 
+sub compare{
+	my @a = split /\s+/, $a;
+	my @b = split /\s+/, $b;
+	if($a[0] < $b[0]){
+		return -1;
+	}
+	if($a[0] > $b[0]){
+		return 1;
+	}
+	return ($a[1] cmp $b[1]);
+}
+
 #call with trialLines hash reference e.g. randomiseTrials \%trialLines
 #returns a randomised array of strings ready to be reformatted to the
 #paramfile format. Each string has seven space separated fields
@@ -108,7 +121,7 @@ sub randomiseTrials {
 		my $buff = cvtTL $t- 1, $TL;
 		push @trialsToRandomise, $buff;
 	}
-	return sort(@trialsToRandomise);
+	return sort compare @trialsToRandomise;
 }
 
 #main function
