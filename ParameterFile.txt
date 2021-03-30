@@ -72,11 +72,11 @@ G+
 
 ITITYPE = FIXED 
 Trial#		 1	2	3	4	
-ITI =	 	9	5	7	5
+ITI =	 	5	5	7	9
 PRE =	 	5	5	5	5
-EVENT =	 	4	1	2	3
-CONTEXT = 	2	1	1	2
-PHASE =	 	1	1	1	1
+EVENT =	 	1	3	2	4
+CONTEXT = 	1	2	1	2
+PHASE =	 	1	1	2	2
 RUN = 1 to 4
 
 ***** Experimental Red+ RedBlue+ *************************************************
@@ -109,10 +109,10 @@ G+
 
 ITITYPE = FIXED 
 Trial#		 1	2	3	4	
-ITI =	 	7	5	15	9
-PRE =	 	5	5	15	5
-EVENT =	 	2	3	4	4
-CONTEXT = 	1	2	4	2
+ITI =	 	15	9	7	5
+PRE =	 	15	5	5	5
+EVENT =	 	4	4	2	3
+CONTEXT = 	4	2	1	2
 PHASE =	 	1	1	1	1
 RUN = 1 to 4
 

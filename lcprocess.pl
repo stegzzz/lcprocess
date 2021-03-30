@@ -21,9 +21,11 @@ my $randomiseCueColours            = '';
 my $randomiseCuePositions          = '';
 my $randomiseFlashRate             = '';
 my $randomiseContexts              = '';
+my $randomisePreCSWithinPhase      = '';
+my $randomiseITIWithinPhase        = '';
 my $allRandomisations              = '';
 my $printVersion                   = '';
-my $version                        = '0.1.1';
+my $version                        = '0.1.2';
 
 if ( !$nargs && !$runWithNoArgsAllowed ) {
 	pod2usage(2);    #exit error 2 after printing SYNOPSIS, verbose 0
@@ -41,6 +43,8 @@ GetOptions(
 	'contextRandomise'   => \$randomiseContexts,
 	'positionRandomise'  => \$randomiseCuePositions,
 	'rateRandomise'      => \$randomiseFlashRate,
+	'preCSRandomise'     => \$randomisePreCSWithinPhase,
+	'itiRandomise'       => \$randomiseITIWithinPhase,
 	'all'                => \$allRandomisations,
 	'version'            => \$printVersion
 ) or pod2usage(2);
@@ -57,6 +61,8 @@ if (
 			|| $randomiseCuePositions
 			|| $randomiseFlashRate
 			|| $randomiseContexts
+			|| $randomisePreCSWithinPhase
+			|| $randomiseITIWithinPhase
 			|| $allRandomisations
 		)
 	)
@@ -107,12 +113,58 @@ sub compare{
 	return ($a[1] cmp $b[1]);
 }
 
+#takes randomised trial cols and preserved trial cols and returns merged
+sub merge{
+	
+}
+#takes @trialsToRandomise from randomiseTrials with col index (3 for Pre, 5 for
+#ITI), randomises that col within phase and returns
+sub sortTrialCol{
+   
+    my @input =@{$_[0]};
+    my $idx=pop;
+    die "invalid indexes passed to sortTrialCol" unless (($idx==3) || ($idx==5)); 
+    my @trialColsToRandomise;
+    my @rndIdx;
+    my @trialColsToPreserve;
+    my @preIdx;
+    foreach my $t (@input){
+    	my @buff = split/\s+/,$t;
+    	if($idx==3){
+    		@rndIdx=(0,1,3);
+    		@preIdx=(2,4,5);
+    	} else {
+    		@rndIdx=(0,1,5);
+    		@preIdx=(2,3,4);
+    		
+    	}
+    	push @trialColsToPreserve, join "\t", @buff[@preIdx];
+    	push @trialColsToRandomise, join "\t",@buff[@rndIdx];
+    }
+    	 $DB::single=1;
+    my @randomised=	sort compare @trialColsToRandomise;
+    
+    my @mergeIdx = $idx==3 ? (0,1,3,2,4,5) : (0,1,3,4,5,2);
+    my @merged;
+    my $i=0;
+    foreach my $t (@randomised){
+    	my $mt=$t."\t".$trialColsToPreserve[$i];
+    	my @buff=split/\s+/,$mt;
+    	push @merged, join "\t",@buff[@mergeIdx];
+    	$i++;
+    }
+    return @merged;
+}
+
 #call with trialLines hash reference e.g. randomiseTrials \%trialLines
 #returns a randomised array of strings ready to be reformatted to the
 #paramfile format. Each string has seven space separated fields
 #PHASE sortKey CTX PRE EVENT ITI
 #sortKey will be dropped to output
 #helper for randomiseTrialsInPhase
+#NEW call with additional parameter if preCS or ITI randomisation is
+#requested. additional parameter is the index of the col of trialsToRandomise
+#that needs sorting preCS index is 2, ITI index is 3
 sub randomiseTrials {
 	my $TL = $_[0];
 	my $nt = split /\s+/, %$TL{'Trial'};
@@ -121,10 +173,15 @@ sub randomiseTrials {
 		my $buff = cvtTL $t- 1, $TL;
 		push @trialsToRandomise, $buff;
 	}
+
+	if(scalar @_ ==2){
+	    return sortTrialCol \@trialsToRandomise, $_[1];
+	}
+$DB::single=1;
 	return sort compare @trialsToRandomise;
 }
 
-#main function
+#main function:
 sub randomiseTrialsInPhase {
 	open my $infh, '<', $inf, or die "Cannot open $inf for reading : $! \n";
 	open my $oufh, '>', $ouf, or die "Cannot open $ouf for writing : $! \n";
@@ -140,10 +197,8 @@ sub randomiseTrialsInPhase {
 	);
 	my $ntlines = 6; #number of rows for trials representation [Trial# .. PHASE]
 	my $trialLineCounter = 0;
-	my %trialLines
-	  ; #a hash indexed by the keys [Trial..PHASE] to access the string value of each row, used for input and sorting
-	my %trialLinesProcessed
-	  ;    #%trialLines after trial order randomised within phase
+	my %trialLines; #a hash indexed by the keys [Trial..PHASE] to access the string value of each row, used for input and sorting
+	my %trialLinesProcessed;    #%trialLines after trial order randomised within phase
 
 	while (<$infh>) {
 		chomp;
@@ -157,10 +212,9 @@ sub randomiseTrialsInPhase {
 			if ( $trialLineCounter > 6 ) {
 				$trialLineCounter = 0;
 				print "\n";
-				my @randomisedTrials =
-				  randomiseTrials \%trialLines;   #and write the new trial block
-				my @AoA
-				  ; #convert @randomisedTrials from array of strings to array of arrays, ready for a transpose operation
+$DB::single=1;
+				my @randomisedTrials = scalar @_==0 ? randomiseTrials \%trialLines : randomiseTrials \%trialLines, $_[0];   #and write the new trial block, calling randomiseTrials with second parameter if the randomisation request is for preCS or ITI randomisation
+				my @AoA; #convert @randomisedTrials from array of strings to array of arrays, ready for a transpose operation
 				foreach (@randomisedTrials) {
 					my @buff = split /\s+/;
 					push @AoA, [@buff];    #see perldoc perllol
@@ -342,6 +396,15 @@ if ($randomiseTrialOrderWithinPhase) {
 	randomiseTrialsInPhase;
 }
 
+if($randomisePreCSWithinPhase){
+	$DB::single=1;
+    randomiseTrialsInPhase (3);
+}
+
+if($randomiseITIWithinPhase){
+    randomiseTrialsInPhase (5);
+}
+
 if ($randomiseCueColours) {
 	randomiseCSBlock "col";
 }
@@ -360,6 +423,8 @@ if ($randomiseContexts) {
 
 if ($allRandomisations) {
 	randomiseTrialsInPhase;
+	randomiseTrialsInPhase (3);
+	randomiseTrialsInPhase (5);
 	randomiseCSBlock "col";
 	randomiseCSBlock "pos";
 	randomiseCSBlock "rate";
@@ -401,9 +466,12 @@ examples:
    
    perl lcprocess.pl -f params.txt -a -n 			
    #all randomisations, NO backup
+   
+   perl lcprocess.pl -h
+   #help
 
+=head1 OPTIONS
 
- Options:
    -help                brief help message
    -man                 full documentation
    -file                parameter file to process, use with operation parameters below
@@ -412,18 +480,18 @@ examples:
    -positionRandomise   randomise cue position allocations
    -rateRandomise       randomise cue flash rate
    -contextRandomise    randomise context allocations
-   -all                 all five randomisations
+   -preCSRandomise      randomise pre-cs intervals within phase
+   -itiRandomise        randomise ITIs within phase
+   -all                 all seven randomisations
    -nobackup            don't create a backup, by default numbered backups produced
-
-=head1 OPTIONS
-
+   
 =over 4
 
-=item B<-help>
+=item B<-note 1>
 
 Helper program for learning chicken parameter file randomisations
 
-=item B<-man>
+=item B<-note 2>
 
 This program needs a perl installation. It was developed and appears to work on Windows 10 
 with Strawberry Perl v5.32.0 and should work anywhere as Perl is mostly portable. As well 
@@ -431,6 +499,10 @@ as a standard Perl installation this program depends on two CPAN modules. These 
 installed by running cpan String::Random and cpan File::BackupCopy.
 
 =back
+
+=head1 HISTORY
+
+30/3/2021 -- added -preCSRandomise and  -itiRandomise options
 
 =head1 DESCRIPTION
 
@@ -454,7 +526,6 @@ how. Tried running PHP exec to run script but did not work.
 Print a summary of trials within phases/contexts e.g. 
    Phase 1, context A: 5x A+, 5x B-; context B: 3x C-:
    Phase 2, context A: 5x AB+, 5x B-; context B: 3x C-:
-
 
 =head2 RANDOMISATION DETAILS
 
@@ -480,8 +551,12 @@ Print a summary of trials within phases/contexts e.g.
    -contextRandomise
    
    Each of the context names in the CONTEXT DEFINITION block are randomly allocated to each integer valued
-   context code with the exception of the TRAINING context i.e. the line "0 =  TRAINING" is left unchanged. 
-
+   context code with the exception of the TRAINING context i.e. the line "0 =  TRAINING" is left unchanged.
+   
+   -preCSRandomise
+   -itiRandomise
+   
+   Each of the intervals ITI/PRE are ordered randomly within phase. 
 
 =head1 AUTHOR
 
